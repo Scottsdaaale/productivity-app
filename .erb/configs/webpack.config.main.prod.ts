@@ -15,8 +15,15 @@ import deleteSourceMaps from '../scripts/delete-source-maps';
 checkNodeEnv('production');
 deleteSourceMaps();
 
-const configuration: webpack.Configuration = {
-  devtool: 'source-map',
+const devtoolsConfig =
+  process.env.DEBUG_PROD === 'true'
+    ? {
+        devtool: 'source-map',
+      }
+    : {};
+
+export default merge(baseConfig, {
+  ...devtoolsConfig,
 
   mode: 'production',
 
@@ -24,15 +31,12 @@ const configuration: webpack.Configuration = {
 
   entry: {
     main: path.join(webpackPaths.srcMainPath, 'main.ts'),
-    preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
+    preload: path.join(webpackPaths.srcMainPath, 'preload.js'),
   },
 
   output: {
     path: webpackPaths.distMainPath,
     filename: '[name].js',
-    library: {
-      type: 'umd',
-    },
   },
 
   optimization: {
@@ -45,8 +49,9 @@ const configuration: webpack.Configuration = {
 
   plugins: [
     new BundleAnalyzerPlugin({
-      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
-      analyzerPort: 8888,
+      analyzerMode:
+        process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
+      openAnalyzer: process.env.OPEN_ANALYZER === 'true',
     }),
 
     /**
@@ -63,10 +68,6 @@ const configuration: webpack.Configuration = {
       DEBUG_PROD: false,
       START_MINIMIZED: false,
     }),
-
-    new webpack.DefinePlugin({
-      'process.type': '"browser"',
-    }),
   ],
 
   /**
@@ -78,6 +79,4 @@ const configuration: webpack.Configuration = {
     __dirname: false,
     __filename: false,
   },
-};
-
-export default merge(baseConfig, configuration);
+});
