@@ -7,14 +7,7 @@ import Navbar from './components/Navbar';
 import Notes from './components/Notes';
 import Pomodoro from './components/Pomodoro';
 import TodoList from './components/TodoList';
-
-function Hello() {
-  return (
-    <div>
-      <p className="text-4xl text-gray-800 dark:text-gray-300">fuck</p>
-    </div>
-  );
-}
+import Dashboard from './components/Dashboard';
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -45,7 +38,7 @@ export default function App() {
         <Navbar toggleDarkMode={toggleDarkMode} darkMode={darkMode}/>
         <div className="container mx-auto px-4 py-8">
           <Routes>
-            <Route path="/" element={<Hello />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="notes" element={<Notes />} />
             <Route path="pomodoro" element={<Pomodoro />} />
             <Route path="todo" element={<TodoList />} />

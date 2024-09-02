@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000'; // adjust this if your backend is on a different port
+const API_URL = 'http://127.0.0.1:5000/notes'; // adjust this if your backend is on a different port
 
 let authToken: string | null = null;
 

@@ -8,6 +8,8 @@ module.exports = {
       colors: {
         sky: colors.sky,
         cyan: colors.cyan,
+        light: '#1f2937',
+        dark: '#e5e7eb',
       },
     },
   },
