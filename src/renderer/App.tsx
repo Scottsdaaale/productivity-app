@@ -4,7 +4,7 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import 'tailwindcss/tailwind.css';
 import Navbar from './components/Navbar';
-import Notes from './components/Notes';
+import Notes from './components/notes/Notes';
 import Pomodoro from './components/Pomodoro';
 import TodoList from './components/TodoList';
 import Dashboard from './components/Dashboard';

@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getNotes, createNote, updateNote, deleteNote } from '../../api/notes';
-
-interface Note {
-  id: number;
-  title: string;
-  content: string;
-}
+import { getNotes, createNote, updateNote, deleteNote, Note } from './calls';
 
 const Notes: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -45,11 +39,12 @@ const Notes: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const newNote = await createNote(currentNoteTitle, currentNoteContent);
-      setNotes([...notes, newNote]);
-      setSelectedNoteId(newNote.id);
-      setCurrentNoteTitle('');
-      setCurrentNoteContent('');
+      const response = await createNote(currentNoteTitle, currentNoteContent);
+      if (response.message === 'Note created successfully') {
+        await fetchNotes(); // Refresh the notes list
+        setCurrentNoteTitle('');
+        setCurrentNoteContent('');
+      }
     } catch (error) {
       setError('Failed to create note');
       console.error('Failed to create note:', error);
@@ -62,12 +57,14 @@ const Notes: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      await deleteNote(id);
-      setNotes(notes.filter((note) => note.id !== id));
-      if (selectedNoteId === id) {
-        setSelectedNoteId(null);
-        setCurrentNoteTitle('');
-        setCurrentNoteContent('');
+      const response = await deleteNote(id);
+      if (response.message === 'Note deleted successfully') {
+        await fetchNotes(); // Refresh the notes list
+        if (selectedNoteId === id) {
+          setSelectedNoteId(null);
+          setCurrentNoteTitle('');
+          setCurrentNoteContent('');
+        }
       }
     } catch (error) {
       setError('Failed to delete note');
@@ -91,18 +88,14 @@ const Notes: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        await updateNote(selectedNoteId, currentNoteTitle, currentNoteContent);
-        setNotes(
-          notes.map((note) =>
-            note.id === selectedNoteId
-              ? {
-                  ...note,
-                  title: currentNoteTitle,
-                  content: currentNoteContent,
-                }
-              : note,
-          ),
+        const response = await updateNote(
+          selectedNoteId,
+          currentNoteTitle,
+          currentNoteContent,
         );
+        if (response.message === 'Note updated successfully') {
+          await fetchNotes(); // Refresh the notes list
+        }
       } catch (error) {
         setError('Failed to update note');
         console.error('Failed to update note:', error);
