@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-
 import './App.css';
 import 'tailwindcss/tailwind.css';
 import Navbar from './components/Navbar';
-import Notes from './components/notes/Notes';
+import Notes from './components/Notes';
 import Pomodoro from './components/Pomodoro';
 import TodoList from './components/TodoList';
 import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+import Register from './components/Register';
 
-export default function App() {
+const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!localStorage.getItem('access_token'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    setIsAuthenticated(false);
+  };
 
   useEffect(() => {
     if (
@@ -35,16 +42,25 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
-        <Navbar toggleDarkMode={toggleDarkMode} darkMode={darkMode}/>
+        <Navbar
+          toggleDarkMode={toggleDarkMode}
+          darkMode={darkMode}
+          isAuthenticated={isAuthenticated}
+          onLogout={handleLogout}
+        />
         <div className="container mx-auto px-4 py-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="notes" element={<Notes />} />
-            <Route path="pomodoro" element={<Pomodoro />} />
             <Route path="todo" element={<TodoList />} />
+            <Route path="pomodoro" element={<Pomodoro />} />
+            <Route path="login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
+            <Route path="register" element={<Register />} />
           </Routes>
         </div>
       </div>
     </Router>
   );
-}
+};
+
+export default App;

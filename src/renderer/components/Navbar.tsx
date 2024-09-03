@@ -4,16 +4,18 @@ import { Link, useLocation } from 'react-router-dom';
 interface NavbarProps {
   toggleDarkMode: () => void;
   darkMode: boolean;
+  isAuthenticated: boolean;
+  onLogout: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ toggleDarkMode, darkMode }) => {
+const Navbar: React.FC<NavbarProps> = ({ toggleDarkMode, darkMode, isAuthenticated, onLogout }) => {
   const location = useLocation();
 
   const navItems = [
     { path: '/', label: 'Dashboard' },
     { path: '/notes', label: 'Notes' },
-    { path: '/pomodoro', label: 'Pomodoro' },
     { path: '/todo', label: 'Todo' },
+    { path: '/pomodoro', label: 'Pomodoro' },
   ];
 
   return (
@@ -25,11 +27,10 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDarkMode, darkMode }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`py-2 px-3 text-sm font-medium rounded-md ${
-                  location.pathname === item.path
-                    ? 'text-white bg-gray-900'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                } transition duration-300`}
+                className={`py-2 px-3 text-sm font-medium rounded-md ${location.pathname === item.path
+                  ? 'text-white bg-gray-900'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  } transition duration-300`}
               >
                 {item.label}
               </Link>
@@ -40,6 +41,21 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDarkMode, darkMode }) => {
             >
               {darkMode ? '☀️' : '🌙'}
             </button>
+            {isAuthenticated ? (
+              <button
+                onClick={onLogout}
+                className="py-2 px-4 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getNotes, createNote, updateNote, deleteNote, Note } from './calls';
+import { getNotes, createNote, updateNote, deleteNote, Note } from './api/notesRoutes';
 
 const Notes: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -12,6 +12,28 @@ const Notes: React.FC = () => {
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  useEffect(() => {
+    const autoSave = async () => {
+      if (selectedNoteId !== null && (currentNoteTitle || currentNoteContent)) {
+        try {
+          await updateNote(selectedNoteId, currentNoteTitle, currentNoteContent);
+          setNotes((prevNotes) =>
+            prevNotes.map((note) =>
+              note.id === selectedNoteId
+                ? { ...note, title: currentNoteTitle, content: currentNoteContent }
+                : note
+            )
+          );
+        } catch (error) {
+          setError('Failed to update note');
+          console.error('Failed to update note:', error);
+        }
+      }
+    };
+
+    autoSave();
+  }, [currentNoteTitle, currentNoteContent, selectedNoteId]);
 
   const fetchNotes = async () => {
     setIsLoading(true);
@@ -39,11 +61,11 @@ const Notes: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await createNote(currentNoteTitle, currentNoteContent);
+      const response = await createNote('New Note', ''); // Create a new note with title "New Note"
       if (response.message === 'Note created successfully') {
-        await fetchNotes(); // Refresh the notes list
-        setCurrentNoteTitle('');
-        setCurrentNoteContent('');
+        const newNote = response.note;
+        setNotes((prevNotes) => [...prevNotes, newNote]);
+        selectNote(newNote.id);
       }
     } catch (error) {
       setError('Failed to create note');
@@ -59,7 +81,7 @@ const Notes: React.FC = () => {
     try {
       const response = await deleteNote(id);
       if (response.message === 'Note deleted successfully') {
-        await fetchNotes(); // Refresh the notes list
+        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
         if (selectedNoteId === id) {
           setSelectedNoteId(null);
           setCurrentNoteTitle('');
@@ -78,30 +100,8 @@ const Notes: React.FC = () => {
     setSelectedNoteId(id);
     const selectedNote = notes.find((note) => note.id === id);
     if (selectedNote) {
-      setCurrentNoteTitle(selectedNote.title);
+      setCurrentNoteTitle(selectedNote.title || 'New Note');
       setCurrentNoteContent(selectedNote.content);
-    }
-  };
-
-  const updateNoteHandler = async () => {
-    if (selectedNoteId) {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await updateNote(
-          selectedNoteId,
-          currentNoteTitle,
-          currentNoteContent,
-        );
-        if (response.message === 'Note updated successfully') {
-          await fetchNotes(); // Refresh the notes list
-        }
-      } catch (error) {
-        setError('Failed to update note');
-        console.error('Failed to update note:', error);
-      } finally {
-        setIsLoading(false);
-      }
     }
   };
 
@@ -129,12 +129,11 @@ const Notes: React.FC = () => {
           {notes.map((note) => (
             <li
               key={note.id}
-              className={`p-4 cursor-pointer hover:bg-gray-100 ${
-                selectedNoteId === note.id ? 'bg-gray-200' : ''
-              }`}
+              className={`p-4 cursor-pointer hover:bg-gray-100 ${selectedNoteId === note.id ? 'bg-gray-200' : ''
+                }`}
               onClick={() => selectNote(note.id)}
             >
-              <h3 className="font-medium truncate">{note.title}</h3>
+              <h3 className="font-medium truncate">{note.title || 'New Note'}</h3>
               <p className="text-sm text-gray-600 truncate">{note.content}</p>
             </li>
           ))}
@@ -160,12 +159,6 @@ const Notes: React.FC = () => {
           />
         </div>
         <div className="flex space-x-4">
-          <button
-            onClick={selectedNoteId ? updateNoteHandler : addNote}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
-          >
-            {selectedNoteId ? 'Update Note' : 'Save Note'}
-          </button>
           {selectedNoteId && (
             <button
               onClick={() => deleteNoteHandler(selectedNoteId)}
