@@ -95,48 +95,53 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 rounded-lg">
-      <div className="flex flex-col items-center">
-        <p className="text-4xl font-bold text-light mb-2 dark:text-dark">
-          {formatTime(currentDateTime)}
-        </p>
-        <p className="text-xl mb-4 text-light dark:text-dark">
-          {formatDate(currentDateTime)}
-        </p>
-        <form onSubmit={handleSubmit} className="mb-4">
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter city or address"
-            className="px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Get Weather
-          </button>
-        </form>
-        {loading && (
-          <p className="text-light dark:text-dark">Loading weather data...</p>
-        )}
-        {weather && (
-          <div className="text-center">
-            <p className="text-3xl font-bold text-light mb-2 dark:text-dark">
-              {weather.temperature}°F
-            </p>
-            <p className="text-xl capitalize text-light mb-2 dark:text-dark">
-              {getWeatherDescription(weather.weatherCode)}
-            </p>
-            <p className="text-lg text-light mb-2 dark:text-dark">
-              Wind Speed: {weather.windSpeed} km/h
-            </p>
-          </div>
-        )}
+    <div className="flex items-start justify-center min-h-screen bg-gray-100 dark:bg-gray-900 pt-20">
+      <div className="p-6 rounded-lg bg-white dark:bg-gray-800 shadow-lg max-w-md w-full">
+        <div className="flex flex-col items-center">
+          <p className="text-7xl font-bold text-gray-800 mb-2 dark:text-white">
+            {formatTime(currentDateTime)}
+          </p>
+          <p className="text-xl mb-4 text-gray-600 dark:text-gray-300">
+            {formatDate(currentDateTime)}
+          </p>
+          <form onSubmit={handleSubmit} className="mb-4 w-full">
+            <div className="flex">
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Enter city or address"
+                className="px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Get Weather
+              </button>
+            </div>
+          </form>
+          {loading && (
+            <p className="text-gray-600 dark:text-gray-300">Loading weather data...</p>
+          )}
+          {weather && (
+            <div className="text-center">
+              <p className="text-3xl font-bold text-gray-800 mb-2 dark:text-white">
+                {weather.temperature}°F
+              </p>
+              <p className="text-xl capitalize text-gray-600 mb-2 dark:text-gray-300">
+                {getWeatherDescription(weather.weatherCode)}
+              </p>
+              <p className="text-lg text-gray-600 mb-2 dark:text-gray-300">
+                Wind Speed: {weather.windSpeed} km/h
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
 
 export default Dashboard;
