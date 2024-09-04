@@ -41,14 +41,14 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+      <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-gray-900 transition-colors duration-200">
         <Navbar
           toggleDarkMode={toggleDarkMode}
           darkMode={darkMode}
           isAuthenticated={isAuthenticated}
           onLogout={handleLogout}
         />
-        <div className="container mx-auto px-4 py-8">
+        <div className="flex-1 overflow-hidden">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="notes" element={<Notes />} />
