@@ -4,6 +4,8 @@ export interface Note {
   id: number;
   title: string;
   content: string;
+  created_at: string; // or Date, depending on your API response
+  updated_at: string; // or Date
 }
 
 interface NotesResponse {
@@ -12,6 +14,7 @@ interface NotesResponse {
 
 interface MessageResponse {
   message: string;
+  note?: Note; // `note` might be included in the response
 }
 
 // Fetch only notes belonging to the logged-in user
@@ -37,7 +40,7 @@ export async function getNotes(): Promise<NotesResponse> {
 }
 
 // Create a note for the logged-in user
-export const createNote = async (title: string, content: string) => {
+export const createNote = async (title: string, content: string): Promise<MessageResponse> => {
   const response = await fetch(`${API_BASE_URL}/notes`, {
     method: 'POST',
     headers: {
@@ -59,7 +62,7 @@ export const createNote = async (title: string, content: string) => {
 export async function updateNote(
   id: number,
   title: string,
-  content: string,
+  content: string
 ): Promise<MessageResponse> {
   const response = await fetch(`${API_BASE_URL}/notes/${id}`, {
     method: 'PUT',
@@ -69,9 +72,11 @@ export async function updateNote(
     },
     body: JSON.stringify({ title, content }),
   });
+
   if (!response.ok) {
     throw new Error('Failed to update note');
   }
+
   return response.json();
 }
 
@@ -83,8 +88,10 @@ export async function deleteNote(id: number): Promise<MessageResponse> {
       'Authorization': `Bearer ${localStorage.getItem('access_token')}`
     }
   });
+
   if (!response.ok) {
     throw new Error('Failed to delete note');
   }
+
   return response.json();
 }
