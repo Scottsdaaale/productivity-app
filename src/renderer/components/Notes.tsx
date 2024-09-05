@@ -1,67 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { getNotes, createNote, updateNote, deleteNote, Note } from './api/notesRoutes';
+import React from 'react';
+import { useNotes, truncateText } from './utils/notesUtils';
 
 const Notes: React.FC = () => {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
-  const [currentNoteTitle, setCurrentNoteTitle] = useState<string>('');
-  const [currentNoteContent, setCurrentNoteContent] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
+  const {
+    notes,
+    selectedNoteId,
+    currentNoteTitle,
+    currentNoteContent,
+    isLoading,
+    error,
+    showDeleteConfirmation,
+    setCurrentNoteTitle,
+    setCurrentNoteContent,
+    setShowDeleteConfirmation,
+    selectNote,
+    addNote,
+    deleteNoteHandler,
+  } = useNotes();
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  useEffect(() => {
-    if (notes.length > 0 && selectedNoteId === null) {
-      const newestNote = notes[0];
-      selectNote(newestNote.id);
-    }
-  }, [notes]);
-
-  useEffect(() => {
-    const autoSave = async () => {
-      if (selectedNoteId !== null && (currentNoteTitle || currentNoteContent)) {
-        try {
-          await updateNote(selectedNoteId, currentNoteTitle, currentNoteContent);
-          setNotes((prevNotes) =>
-            prevNotes.map((note) =>
-              note.id === selectedNoteId
-                ? { ...note, title: currentNoteTitle, content: currentNoteContent, updated_at: new Date().toISOString() }
-                : note
-            )
-          );
-        } catch (error) {
-          setError('Failed to update note');
-          console.error('Failed to update note:', error);
-        }
-      }
-    };
-
-    autoSave();
-  }, [currentNoteTitle, currentNoteContent, selectedNoteId]);
-
-  const truncateText = (text: string, maxLength: number) => {
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-  };
-
-  const fetchNotes = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getNotes();
-      // Sort notes by newest first
-      const sortedNotes = data.notes.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      setNotes(sortedNotes);
-    } catch (error) {
-      setError('Failed to fetch notes');
-      console.error('Failed to fetch notes:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentNoteTitle(e.target.value);
@@ -71,62 +34,6 @@ const Notes: React.FC = () => {
     setCurrentNoteContent(e.target.value);
   };
 
-  const addNote = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await createNote('New Note', '');
-      if (response.message === 'Note created successfully' && response.note) {
-        const newNote = response.note;
-        // Add the new note on top of the list
-        setNotes((prevNotes) => [newNote, ...prevNotes]);
-        setSelectedNoteId(newNote.id);
-        setCurrentNoteTitle(newNote.title);
-        setCurrentNoteContent(newNote.content);
-      }
-    } catch (error) {
-      setError('Failed to create note');
-      console.error('Failed to create note:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const deleteNoteHandler = async () => {
-    if (selectedNoteId === null) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await deleteNote(selectedNoteId);
-      if (response.message === 'Note deleted successfully') {
-        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== selectedNoteId));
-        const remainingNotes = notes.filter((note) => note.id !== selectedNoteId);
-        if (remainingNotes.length > 0) {
-          selectNote(remainingNotes[0].id);
-        } else {
-          setSelectedNoteId(null);
-          setCurrentNoteTitle('');
-          setCurrentNoteContent('');
-        }
-      }
-    } catch (error) {
-      setError('Failed to delete note');
-      console.error('Failed to delete note:', error);
-    } finally {
-      setIsLoading(false);
-      setShowDeleteConfirmation(false);
-    }
-  };
-
-  const selectNote = (id: number) => {
-    setSelectedNoteId(id);
-    const selectedNote = notes.find((note) => note.id === id);
-    if (selectedNote) {
-      setCurrentNoteTitle(selectedNote.title);
-      setCurrentNoteContent(selectedNote.content);
-    }
-  };
-
   const showDeleteConfirmationPrompt = () => {
     setShowDeleteConfirmation(true);
   };
@@ -134,14 +41,6 @@ const Notes: React.FC = () => {
   const closeDeleteConfirmationPrompt = () => {
     setShowDeleteConfirmation(false);
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
@@ -205,12 +104,12 @@ const Notes: React.FC = () => {
             {notes.map((note) => (
               <li
                 key={note.id}
-                className={`flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedNoteId === note.id ? 'bg-gray-200 dark:bg-gray-600' : ''
+                className={`flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedNoteId === note.id ? 'bg-gray-100 dark:bg-gray-700' : ''
                   } transition-colors duration-200`}
                 onClick={() => selectNote(note.id)}
               >
                 <div className="flex-1">
-                  <h3 className="font-medium truncate text-gray-900 dark:text-gray-100">
+                  <h3 className="text-sm truncate text-gray-900 dark:text-gray-100">
                     {truncateText(note.title || 'New Note', 20)}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
