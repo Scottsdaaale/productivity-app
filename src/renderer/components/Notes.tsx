@@ -1,5 +1,6 @@
 import React from 'react';
-import { useNotes, truncateText } from './utils/notesUtils';
+import { useNotes, truncateText, stripHtml } from './utils/notesUtils';
+import TiptapEditor from './Tiptap';
 
 const Notes: React.FC = () => {
   const {
@@ -30,8 +31,8 @@ const Notes: React.FC = () => {
     setCurrentNoteTitle(e.target.value);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentNoteContent(e.target.value);
+  const handleContentChange = (content: string) => {
+    setCurrentNoteContent(content);
   };
 
   const showDeleteConfirmationPrompt = () => {
@@ -50,7 +51,7 @@ const Notes: React.FC = () => {
           {/* Add Note Button */}
           <button
             onClick={addNote}
-            className="w-12 h-12 mb-2 flex items-center justify-center 
+            className="w-12 h-12  flex items-center justify-center 
       bg-transparent 
       text-gray-800 dark:text-gray-200 
       hover:text-blue-600 dark:hover:text-blue-400 
@@ -76,7 +77,7 @@ const Notes: React.FC = () => {
           {/* Delete Button */}
           <button
             onClick={showDeleteConfirmationPrompt}
-            className="w-12 h-12 mb-2 flex items-center justify-center 
+            className="w-12 h-12  flex items-center justify-center 
       bg-transparent 
       text-gray-800 dark:text-gray-200 
       hover:text-red-600 dark:hover:text-red-400 
@@ -104,7 +105,7 @@ const Notes: React.FC = () => {
             {notes.map((note) => (
               <li
                 key={note.id}
-                className={`flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedNoteId === note.id ? 'bg-gray-100 dark:bg-gray-700' : ''
+                className={`flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${selectedNoteId === note.id ? 'bg-gray-100 dark:bg-gray-600' : ''
                   } transition-colors duration-200`}
                 onClick={() => selectNote(note.id)}
               >
@@ -113,7 +114,7 @@ const Notes: React.FC = () => {
                     {truncateText(note.title || 'New Note', 20)}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                    {truncateText(note.content, 20)}
+                    {truncateText(stripHtml(note.content), 20)}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-300">
                     {`${new Date(note.updated_at).toLocaleDateString()}`}
@@ -126,20 +127,18 @@ const Notes: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-gray-800">
-        <div className="flex-grow flex flex-col overflow-hidden">
-          <input
-            type="text"
-            value={currentNoteTitle}
-            onChange={handleTitleChange}
-            placeholder="Note Title"
-            className="w-full p-3 border-b-[1px] text-xl font-semibold border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-          <textarea
-            value={currentNoteContent}
-            onChange={handleContentChange}
-            placeholder="Enter your note here"
-            className="h-full p-3 border-gray-300 dark:border-gray-600 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-gray-700">
+        <input
+          type="text"
+          value={currentNoteTitle}
+          onChange={handleTitleChange}
+          placeholder="Note Title"
+          className="w-full p-[10px] text-xl font-semibold border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        />
+        <div className="h-full">
+          <TiptapEditor
+            content={currentNoteContent}
+            onUpdate={handleContentChange}
           />
         </div>
       </div>
