@@ -2,6 +2,12 @@
 .tiptap {
   :first-child {
     margin-top: 0;
+
+  }
+  .ProseMirror {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
   }
 
   /* List styles */

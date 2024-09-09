@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getNotes, createNote, updateNote, deleteNote, Note } from '../api/notesRoutes';
+import { getNotes, createNote, updateNote, deleteNote} from '../api/notesRoutes';
+import { Note } from '../../types'
 
 export const useNotes = () => {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -15,7 +16,12 @@ export const useNotes = () => {
         setError(null);
         try {
             const data = await getNotes();
-            const sortedNotes = data.notes.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            console.log('Fetched notes:', data.notes); // Add this line
+            const sortedNotes = data.notes.sort((a, b) => {
+                const dateA = new Date(a.updated_at || a.created_at).getTime();
+                const dateB = new Date(b.updated_at || b.created_at).getTime();
+                return dateB - dateA;
+            });
             setNotes(sortedNotes);
         } catch (error) {
             setError('Failed to fetch notes');
@@ -67,14 +73,17 @@ export const useNotes = () => {
         }
     };
 
-    const addNote = async () => {
+    const addNote = async (folderId: number | null = null) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await createNote('New Note', '');
+            const response = await createNote('New Note', '', folderId);
             if (response.message === 'Note created successfully' && response.note) {
                 const newNote = response.note;
-                setNotes((prevNotes) => [newNote, ...prevNotes]);
+                setNotes((prevNotes) => {
+                    const updatedNotes = [newNote, ...prevNotes];
+                    return updatedNotes.sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
+                });
                 setSelectedNoteId(newNote.id);
                 setCurrentNoteTitle(newNote.title);
                 setCurrentNoteContent(newNote.content);
@@ -115,6 +124,7 @@ export const useNotes = () => {
 
     return {
         notes,
+        setNotes,
         selectedNoteId,
         currentNoteTitle,
         currentNoteContent,

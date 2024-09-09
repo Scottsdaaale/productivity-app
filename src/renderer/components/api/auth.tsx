@@ -1,8 +1,7 @@
+import { AuthResponse } from '../../types'; // Assuming you have these types defined
+
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
-export interface AuthResponse {
-  access_token: string;
-}
 
 export async function login(username: string, password: string): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE_URL}/login`, {

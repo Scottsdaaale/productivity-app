@@ -1,21 +1,6 @@
+import { NotesResponse, MessageResponse } from '../../types'; // Assuming you have these types defined
+
 const API_BASE_URL = 'http://127.0.0.1:5000';
-
-export interface Note {
-  id: number;
-  title: string;
-  content: string;
-  created_at: string; // or Date, depending on your API response
-  updated_at: string; // or Date
-}
-
-interface NotesResponse {
-  notes: Note[];
-}
-
-interface MessageResponse {
-  message: string;
-  note?: Note; // `note` might be included in the response
-}
 
 // Fetch only notes belonging to the logged-in user
 export async function getNotes(): Promise<NotesResponse> {
@@ -24,30 +9,39 @@ export async function getNotes(): Promise<NotesResponse> {
     throw new Error('No access token found');
   }
 
-  const response = await fetch(`${API_BASE_URL}/get_all_notes`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
+  try {
+    const response = await fetch(`${API_BASE_URL}/get_all_notes`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to fetch notes');
     }
-  });
-  if (!response.ok) {
-    throw new Error('Failed to fetch notes');
+
+    const data = await response.json();
+    if (!Array.isArray(data.notes)) {
+      throw new Error('Invalid response format');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    throw error;
   }
-  const data = await response.json();
-  if (!data.notes) {
-    throw new Error('Invalid response format');
-  }
-  return data;
 }
 
 // Create a note for the logged-in user
-export const createNote = async (title: string, content: string): Promise<MessageResponse> => {
+export const createNote = async (title: string, content: string, folderId: number | null): Promise<MessageResponse> => {
   const response = await fetch(`${API_BASE_URL}/notes`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
     },
-    body: JSON.stringify({ title, content }),
+    body: JSON.stringify({ title, content, folder_id: folderId }),
   });
 
   if (!response.ok) {
@@ -57,7 +51,6 @@ export const createNote = async (title: string, content: string): Promise<Messag
 
   return await response.json();
 };
-
 // Update a note for the logged-in user
 export async function updateNote(
   id: number,

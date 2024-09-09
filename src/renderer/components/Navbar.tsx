@@ -14,8 +14,8 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDarkMode, darkMode, isAuthenticat
   const navItems = [
     { path: '/', label: 'Dashboard' },
     { path: '/notes', label: 'Notes' },
-    // { path: '/todo', label: 'Todo' },
-    // { path: '/pomodoro', label: 'Pomodoro' },
+    { path: '/todo', label: 'Todo' },
+    { path: '/pomodoro', label: 'Pomodoro' },
   ];
 
   return (

@@ -1,5 +1,5 @@
 import './styles/tiptap.scss'
-import React, {useEffect, useState} from 'react';
+import React, { useEffect } from 'react';
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import { EditorContent, useEditor } from '@tiptap/react'
@@ -21,7 +21,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         `px-2 py-1 rounded ${isActive ? 'bg-blue-500 text-white' : 'bg-grey-400 dark:bg-gray-600 text-gray-700 dark:text-gray-200'}`
 
     return (
-        <div className="control-group bg-white dark:bg-gray-700 p-2 flex flex-wrap gap-1">
+        <div className="control-group bg-white dark:bg-gray-800 p-2 flex flex-wrap gap-1">
             <button
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 disabled={!editor.can().chain().focus().toggleBold().run()}
