@@ -100,8 +100,19 @@ const Notes: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
+      
       <div className="w-64 bg-gray-100 dark:bg-gray-700 shadow-lg flex flex-col">
         {/* Top bar */}
+        {/* Search bar */}
+        <div className="p-4">
+          <input
+            type="text"
+            placeholder="Search notes..."
+            className="w-full p-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         <div className="p-4 flex items-center justify-between border-b dark:border-gray-700">
           <button
             onClick={handleBackNavigation}
@@ -130,16 +141,7 @@ const Notes: React.FC = () => {
           </button>
         </div>
 
-        {/* Search bar */}
-        <div className="p-4">
-          <input
-            type="text"
-            placeholder="Search notes..."
-            className="w-full p-2 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        
 
         {/* Folder contents */}
         <div className="flex-1 overflow-y-auto p-4">
@@ -179,6 +181,7 @@ const Notes: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span className="text-sm dark:text-gray-200">{note.title}</span>
+                <span className="text-sm dark:text-gray-200">{note.updated_at}</span>
               </div>
               <button
                 className="hidden group-hover:block p-1 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 rounded"
@@ -221,7 +224,7 @@ const Notes: React.FC = () => {
               placeholder="Folder name"
               className="w-full p-2 mb-4 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
-            <div className="flex justify-end">
+            <div className="flex justify-between">
               <button
                 onClick={() => setShowNewFolderModal(false)}
                 className="px-4 py-2 mr-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
