@@ -62,3 +62,76 @@ export interface UpdateFolderRequest {
 export interface ErrorResponse {
   message: string;
 }
+
+export interface Todo {
+  id: number;
+  name: string;
+  description?: string;
+  due_date?: string;
+  priority?: string;
+  completed: boolean;
+  folder_id?: number;
+  created_at: string;
+  updated_at: string;
+  user_id: number;
+}
+
+export interface TodosResponse {
+  todos: Todo[];
+}
+
+export interface CreateTodoRequest {
+  name: string;
+  description?: string;
+  due_date?: string;
+  priority?: string;
+  completed?: boolean;
+  folder_id?: number;
+}
+
+export interface UpdateTodoRequest {
+  name?: string;
+  description?: string;
+  due_date?: string;
+  priority?: string;
+  completed?: boolean;
+  folder_id?: number;
+}
+
+// Update MessageResponse to include todo
+export interface MessageResponse {
+  message: string;
+  note?: Note;
+  folder?: Folder;
+  todo?: Todo;
+}
+
+export interface TodoFolder {
+  id: number;
+  name: string;
+  parent_id: number | null;
+  user_id: number;
+}
+
+export interface TodoFoldersResponse {
+  folders: TodoFolder[];
+}
+
+export interface CreateTodoFolderRequest {
+  name: string;
+  parent_id?: number | null;
+}
+
+export interface UpdateTodoFolderRequest {
+  name?: string;
+  parent_id?: number | null;
+}
+
+// Update MessageResponse to include todoFolder
+export interface MessageResponse {
+  message: string;
+  note?: Note;
+  folder?: Folder;
+  todo?: Todo;
+  todoFolder?: TodoFolder;
+}
