@@ -9,13 +9,20 @@ import {
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
+const token = localStorage.getItem('access_token');
+
 export const todoFolderApi = {
     async getFolders(): Promise<TodoFoldersResponse> {
         const response = await fetch(`${API_BASE_URL}/todo-folders`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error response:', errorData);
+            throw new Error(errorData.message || 'Failed to fetch folders');
+        }
         return response.json();
     },
 
@@ -24,10 +31,18 @@ export const todoFolderApi = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
+
             },
             body: JSON.stringify(folderData)
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error response:', errorData);
+            throw new Error(errorData.message || 'Failed to create folder');
+        }
+
         return response.json();
     },
 
@@ -36,7 +51,8 @@ export const todoFolderApi = {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
+
             },
             body: JSON.stringify(folderData)
         });
@@ -47,7 +63,8 @@ export const todoFolderApi = {
         const response = await fetch(`${API_BASE_URL}/todo-folders/${folderId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
+
             }
         });
         return response.json();
@@ -56,7 +73,8 @@ export const todoFolderApi = {
     async getFolderTodos(folderId: number): Promise<{ todos: Todo[] }> {
         const response = await fetch(`${API_BASE_URL}/todo-folders/${folderId}/todos`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
+
             }
         });
         return response.json();

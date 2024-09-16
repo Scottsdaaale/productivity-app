@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import DueDate from './DueDate';
 import { todoRoutes } from '../api/todo-routes/todoRoutes';
-import { CreateTodoRequest } from '../../types';
+import { CreateTodoRequest, Todo } from '../../types';
 
-const AddTodo: React.FC = () => {
+interface AddEditTodoProps {
+    onAddEditTodo: (newTodo: Todo) => void; // Prop to handle new todos
+}
+
+const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo }) => {
     const [task, setTask] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState<Date | null>(null);
@@ -26,13 +30,19 @@ const AddTodo: React.FC = () => {
 
         try {
             const response = await todoRoutes.createTodo(todoData);
-            console.log('Todo created:', response);
+
+            if (response && response.todo) {
+                // Ensure response.todo is not undefined
+                onAddEditTodo(response.todo); // Call the callback function to update the list
+            } else {
+                throw new Error('Invalid response format');
+            }
+
             // Reset form
             setTask('');
             setDescription('');
             setDueDate(null);
             setPriority('');
-            // You might want to trigger a refresh of the todo list here
         } catch (err) {
             setError('Failed to create todo. Please try again.');
             console.error('Error creating todo:', err);
@@ -101,4 +111,4 @@ const AddTodo: React.FC = () => {
     );
 };
 
-export default AddTodo;
+export default AddEditTodo;

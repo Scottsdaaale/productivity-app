@@ -5,7 +5,7 @@ import 'tailwindcss/tailwind.css';
 import Navbar from './components/Navbar';
 import Notes from './components/Notes';
 import Pomodoro from './components/Pomodoro';
-import TodoList from './components/TodoList';
+import Todo from './components/todo/Todo';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -52,7 +52,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="notes" element={<Notes />} />
-            <Route path="todo" element={<TodoList />} />
+            <Route path="todo" element={<Todo />} />
             <Route path="pomodoro" element={<Pomodoro />} />
             <Route path="login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
             <Route path="register" element={<Register />} />
