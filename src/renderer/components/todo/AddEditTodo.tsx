@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DueDate from './DueDate';
 import { todoRoutes } from '../api/todo-routes/todoRoutes';
-import { CreateTodoRequest, Todo } from '../../types';
+import { CreateTodoRequest, UpdateTodoRequest, Todo } from '../../types';
 
 interface AddEditTodoProps {
-    onAddEditTodo: (newTodo: Todo) => void; // Prop to handle new todos
+    onAddEditTodo: (newTodo: Todo) => void;
+    selectedFolderId: number | null;
+    editingTodo?: Todo | null;
+    onCancelEdit?: () => void;
 }
 
-const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo }) => {
+const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo, selectedFolderId, editingTodo, onCancelEdit }) => {
     const [task, setTask] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState<Date | null>(null);
@@ -16,24 +19,41 @@ const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (editingTodo) {
+            setTask(editingTodo.name);
+            setDescription(editingTodo.description || '');
+            setDueDate(editingTodo.due_date ? new Date(editingTodo.due_date) : null);
+            setPriority(editingTodo.priority || '');
+        }
+    }, [editingTodo]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
 
-        const todoData: CreateTodoRequest = {
+        const todoData: CreateTodoRequest | UpdateTodoRequest = {
             name: task,
             description,
             due_date: dueDate ? dueDate.toISOString() : undefined,
             priority: priority || undefined,
+            folder_id: selectedFolderId !== null ? selectedFolderId : undefined
         };
 
         try {
-            const response = await todoRoutes.createTodo(todoData);
+            let response;
+            if (editingTodo) {
+                console.log('Updating todo with data:', todoData);
+                response = await todoRoutes.updateTodo(editingTodo.id, todoData as UpdateTodoRequest);
+            } else {
+                console.log('Creating todo with data:', todoData);
+                response = await todoRoutes.createTodo(todoData as CreateTodoRequest);
+            }
+            console.log('Server response:', response);
 
             if (response && response.todo) {
-                // Ensure response.todo is not undefined
-                onAddEditTodo(response.todo); // Call the callback function to update the list
+                onAddEditTodo(response.todo);
             } else {
                 throw new Error('Invalid response format');
             }
@@ -43,9 +63,12 @@ const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo }) => {
             setDescription('');
             setDueDate(null);
             setPriority('');
+            if (editingTodo && onCancelEdit) {
+                onCancelEdit();
+            }
         } catch (err) {
-            setError('Failed to create todo. Please try again.');
-            console.error('Error creating todo:', err);
+            setError(`Failed to ${editingTodo ? 'update' : 'create'} todo. Please try again.`);
+            console.error(`Error ${editingTodo ? 'updating' : 'creating'} todo:`, err);
         } finally {
             setIsLoading(false);
         }
@@ -55,6 +78,7 @@ const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo }) => {
         setDueDate(date);
         setShowDueDate(false);
     };
+    
 
     return (
         <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-lg shadow-md max-w-md relative">
@@ -99,13 +123,24 @@ const AddEditTodo: React.FC<AddEditTodoProps> = ({ onAddEditTodo }) => {
                     </div>
                 )}
                 {error && <p className="text-red-500">{error}</p>}
-                <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded w-full disabled:opacity-50"
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Adding...' : 'Add Task'}
-                </button>
+                <div className="flex space-x-2">
+                    <button
+                        type="submit"
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded flex-1 disabled:opacity-50"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (editingTodo ? 'Updating...' : 'Adding...') : (editingTodo ? 'Update Task' : 'Add Task')}
+                    </button>
+                    {editingTodo && onCancelEdit && (
+                        <button
+                            type="button"
+                            onClick={onCancelEdit}
+                            className="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded flex-1"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
             </form>
         </div>
     );

@@ -1,4 +1,3 @@
-// TodoList.tsx
 import React, { useState, useEffect } from 'react';
 import AddEditTodo from './AddEditTodo';
 import { Todo, TodosResponse } from '../../types';
@@ -12,6 +11,7 @@ interface TodoListProps {
 const TodoList: React.FC<TodoListProps> = ({ selectedFolderId }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [folderName, setFolderName] = useState<string>('All Todos');
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     fetchTodos();
@@ -47,6 +47,19 @@ const TodoList: React.FC<TodoListProps> = ({ selectedFolderId }) => {
     }
   };
 
+  const handleAddEditTodo = (updatedTodo: Todo) => {
+    if (editingTodo) {
+      setTodos(todos.map(todo => todo.id === updatedTodo.id ? updatedTodo : todo));
+    } else {
+      setTodos([...todos, updatedTodo]);
+    }
+    setEditingTodo(null);
+  };
+
+  const handleTodoClick = (todo: Todo) => {
+    setEditingTodo(todo);
+  };
+
   return (
     <div className="w-full bg-gray-200 dark:bg-gray-800">
       {/* Folder Title */}
@@ -65,28 +78,37 @@ const TodoList: React.FC<TodoListProps> = ({ selectedFolderId }) => {
           {todos.map((todo) => (
             <div
               key={todo.id}
-              className="bg-white dark:bg-gray-800 p-3 rounded-md shadow-md flex items-center justify-between"
+              className="bg-white dark:bg-gray-800 p-3 rounded-md shadow-md flex items-center justify-between cursor-pointer"
+              onClick={() => handleTodoClick(todo)}
             >
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={todo.completed}
-                  onChange={() => handleToggleCompletion(todo.id, todo.completed)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleToggleCompletion(todo.id, todo.completed);
+                  }}
                   className="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
                 />
                 <span className={`text-sm ${todo.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200'}`}>
                   {todo.name}
                 </span>
               </div>
-              <button className="text-sm text-blue-500 dark:text-blue-300">Click on bar to edit details</button>
+              <span className="text-sm text-blue-500 dark:text-blue-300">Click to edit</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Add Todo Component */}
+      {/* Add/Edit Todo Component */}
       <div className="mt-6">
-        <AddEditTodo onAddEditTodo={(newTodo) => setTodos([...todos, newTodo])} />
+        <AddEditTodo
+          onAddEditTodo={handleAddEditTodo}
+          selectedFolderId={selectedFolderId}
+          editingTodo={editingTodo}
+          onCancelEdit={() => setEditingTodo(null)}
+        />
       </div>
     </div>
   );
